@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { FileHandle } from 'node:fs/promises';
 import { encodeBigIntb64v2, decodeBigIntb64v2, ThrowErr, SampleMemoryUsage } from './utility';
 import { PartitionLineLength, LineByteLength } from './config';
 
@@ -9,7 +9,7 @@ const formatValue = (v) => v === null ? '' :
         typeof v === 'boolean' ? v ? '1' : '0' :
           ThrowErr(`Unhandled type ${typeof v}`);
 
-export const WriteLine = async (params: { file: fs.promises.FileHandle, row: number, schema: Object }) => {
+export const WriteLine = async (params: { file: FileHandle, row: number, schema: Object }) => {
   const { file, row, schema: data } = params;
   if (row < 0 || row > PartitionLineLength) throw new Error(`Line number ${row} is out of range`);
 
@@ -29,7 +29,7 @@ export const WriteLine = async (params: { file: fs.promises.FileHandle, row: num
   return await file.writev(arrayBufferView, row * LineByteLength);
 }
 
-export const ReadLine = async (p: { file: fs.promises.FileHandle, row: number, schema?: Object }) => {
+export const ReadLine = async (p: { file: FileHandle, row: number, schema?: Object }) => {
   const { file, row, schema } = p;
   if (row < 0 || row > PartitionLineLength) throw new Error(`Line number ${row} is out of range`);
 

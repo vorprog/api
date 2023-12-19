@@ -4,8 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc src/*.ts --sourceMap --outDir dist",
-    "execute": "node --enable-source-maps dist/main.js",
+    "build": "npx esbuild src/main.ts --bundle --platform=node --sourcemap --loader:.ts=ts --outfile=dist/bundle.js",
+    "execute": "node --enable-source-maps dist/bundle.js",
+    "sea:blob": "node --experimental-sea-config sea-config.json",
+    "sea:copy": "cp $(command -v node) dist/$npm_package_name",
+    "sea:postject": "npx postject dist/$npm_package_name NODE_SEA_BLOB dist/sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
+    "sea:build": "npm run build && npm run sea:blob && npm run sea:copy && npm run sea:postject",
     "start": "npm run build && npm run execute"
   },
   "keywords": [],
@@ -13,11 +17,12 @@
   "license": "ISC",
   "dependencies": {
     "@faker-js/faker": "^8.3.1",
-    "faker-js": "^1.0.0",
-    "typescript": "^5.3.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0"
+    "@types/node": "^20.10.0",
+    "esbuild": "^0.19.9",
+    "postject": "^1.0.0-alpha.6",
+    "typescript": "^5.3.2"
   }
 }

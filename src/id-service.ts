@@ -1,13 +1,11 @@
 import { MsEpochReservationLimit } from './config';
 
-let MsEpochReservations = {};
+let MsEpochReservations: { [key: number]: number } = {};
 
 const attemptReserveId = (p?: { millisecondEpoch?: number, attempt?: number, maxAttempts?: number }): bigint | boolean => {
   const ms = p?.millisecondEpoch || new Date().getTime();
 
-  if (MsEpochReservations.hasOwnProperty(ms) === false) {
-    MsEpochReservations[ms] = 0; 
-  }
+  if (MsEpochReservations.hasOwnProperty(ms) === false) MsEpochReservations[ms] = 0;
   else if (MsEpochReservations[ms] < (MsEpochReservationLimit - 1)) MsEpochReservations[ms]++;
   else {
     const attempt = p?.attempt || 1;
