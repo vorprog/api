@@ -1,11 +1,12 @@
 import * as crypto from 'node:crypto';
 import { IncomingMessage } from 'node:http';
 import { PrivateKey, PublicKey } from './config';
+import { log } from 'node:console';
 
 const base64Charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 let averageMemoryUsage = process.memoryUsage().heapUsed;
 
-const jsonStringify = (obj) => JSON.stringify(obj, (key, value) =>
+const jsonStringify = (obj: { [k: string]: unknown }) => JSON.stringify(obj, (_key, value) =>
   typeof value === 'bigint' ? value.toString() : value);
 
 export const VerifyJwt = (token: string) => {
@@ -30,19 +31,19 @@ export const GenerateJwt = (payload: any) => {
   return `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
 }
 
-export const Log = (data: string | object) => {
+export const Log = (data?: string | { [k: string]: unknown }) => {
   const stackTrace = new Error().stack;
   const stackCall = stackTrace?.split('\n')?.[2]?.trim();
-  const stackLine = stackCall?.split(' ')?.[2];
-  const stackLineFilePaths = stackLine?.split('/');
-  const firstInstanceofSrc = stackLineFilePaths?.indexOf('src');
 
-  const jsonString = jsonStringify({
-    c: stackLineFilePaths?.slice(firstInstanceofSrc).join('/'),
+  const logObject = {
+    p: process.argv[3] || 'main',
+    f: stackCall?.split(' ')[1],
     t: new Date().getTime(),
     d: data
-  });
-  console.log(jsonString);
+  };
+
+  console.log(jsonStringify(logObject));
+  return logObject;
 }
 
 export const ThrowErr = (m: string): never => { throw new Error(m) };
@@ -74,7 +75,7 @@ export const GetCountryCIDRs = async (countryCode: string) => {
   const awsIpResponse = await fetch('https://ip-ranges.amazonaws.com/ip-ranges.json'); // TODO
 }
 
-export const GetHttpRequestBody = async (request: IncomingMessage) : Promise<string> => {
+export const GetHttpRequestBody = async (request: IncomingMessage): Promise<string> => {
   return new Promise((resolve, reject) => {
     let body = '';
     request.on('data', (chunk) => body += chunk);

@@ -1,13 +1,34 @@
 import { RequestListener } from "node:http";
-import { VerifyJwt, GetHttpRequestBody } from './utility';
+import { VerifyJwt, GetHttpRequestBody, Log } from './utility';
 
 const subnetBlacklist: string[] = [];
 const webRTCConnections = {};
 
 export const httpHandler: RequestListener = async (request, response) => {
   for (const subnet of subnetBlacklist) {
-    if (!request.socket.remoteAddress || request.socket.remoteAddress.startsWith(subnet)) return;
+    if (!request.socket.remoteAddress || request.socket.remoteAddress.startsWith(subnet)) {
+      Log({ blocked: request.socket.remoteAddress});
+      return;
+    }
   }
+
+  const requestObject = {
+    method: request.method,
+    url: request.url,
+    headers: request.headers,
+    httpVersion: request.httpVersion,
+    remotePort: request.socket.remotePort,
+    remoteAddress: request.socket.address(),
+    remoteRemoteAddress: request.socket.remoteAddress,
+    remoteFamily: request.socket.remoteFamily,
+    localPort: request.socket.localPort,
+    localAddress: request.socket.address(),
+    localLocalAddress: request.socket.localAddress,
+    localFamily: request.socket.localFamily
+  };
+
+  Log(requestObject);
+
   if (request.headers['authorization']) {
     const token = request.headers['authorization'].split(' ')[1];
     if (!VerifyJwt(token)) {
@@ -30,23 +51,10 @@ export const httpHandler: RequestListener = async (request, response) => {
       return;
     }
 
-    const jsonString = JSON.stringify({
-      method: request.method,
-      url: request.url,
-      headers: request.headers,
-      httpVersion: request.httpVersion,
-      remotePort: request.socket.remotePort,
-      remoteAddress: request.socket.address(),
-      remoteRemoteAddress: request.socket.remoteAddress,
-      remoteFamily: request.socket.remoteFamily,
-      localPort: request.socket.localPort,
-      localAddress: request.socket.address(),
-      localLocalAddress: request.socket.localAddress,
-      localFamily: request.socket.localFamily
-    });
+
 
     response.writeHead(200, { 'Content-Type': 'application/json' });
-    response.end(jsonString + '\n');
+    response.end(JSON.stringify(requestObject) + '\n');
     return;
   }
 
