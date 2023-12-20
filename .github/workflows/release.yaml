@@ -1,0 +1,16 @@
+on: 
+  workflow_dispatch: 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.ref }}
+    steps:
+      - uses: actions/checkout@main
+      - run: |
+          npm run build
+          sleep 5
+          npm run test
+          tar -czvf ./dist/api.tar.gz ./dist/api
+          gh release create ${{ github.ref }} --generate-notes
+          gh release upload ${{ github.ref }} ./dist/api.tar.gz
