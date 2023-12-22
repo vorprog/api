@@ -25,10 +25,13 @@ jobs:
           npm run test
       - name: release
         if: github.ref == 'refs/heads/${{ github.event.repository.default_branch }}'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BINARY_HASH: ${{ hashFiles('dist/$APP_NAME') }}
         run: |
           git tag $APP_VERSION
           git push origin $APP_VERSION
           tar -czvf ./dist/$APP_NAME.tar.gz ./dist/$APP_NAME
-          gh release create $APP_VERSION --generate-notes
+          gh release create $APP_VERSION --generate-notes --notes "Binary hash: $BINARY_HASH"
           gh release upload $APP_VERSION ./dist/$APP_NAME.tar.gz
         # aws s3 cp ./dist/$APP_NAME.tar.gz s3://${{ github.repository_owner }}-$APP_NAME/$APP_VERSION.tar.gz
