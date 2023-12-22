@@ -1,6 +1,8 @@
 import { generateKeyPairSync, createPublicKey } from 'node:crypto';
 import * as z from 'zod';
 
+export const AppVersion = process.env.APP_BUILD_VERSION;
+
 const generatePrivateKey = () => {
   const keyPairSyncResult = generateKeyPairSync('ec', {
     namedCurve: 'prime256v1',

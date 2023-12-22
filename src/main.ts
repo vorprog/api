@@ -1,7 +1,7 @@
 import { Serializable, spawn } from 'node:child_process';
 import { Server } from 'node:http';
 import { Log } from './utility';
-import { HttpPort } from './config';
+import { HttpPort, AppVersion } from './config';
 import { generateUsers } from './worker';
 import { httpHandler } from './http-handler';
 
@@ -9,7 +9,7 @@ import { httpHandler } from './http-handler';
 
 if (process.argv[2] === 'worker') generateUsers();
 else {
-  Log();
+  Log({ version: AppVersion });
   const childProcess = spawn(__filename, ['worker', 'genUserChild'], { stdio: ['inherit', 'inherit', 'inherit', 'ipc'] });
   const messageHandler = (message: Serializable) => Log(JSON.parse(JSON.stringify(message)));
   childProcess.on('message', messageHandler);

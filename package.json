@@ -1,10 +1,8 @@
 {
   "name": "api",
-  "version": "1.0.0",
-  "description": "",
   "main": "src/main.js",
   "scripts": {
-    "build:bundle": "npx esbuild src/main.ts --bundle --platform=node --sourcemap --loader:.ts=ts --outfile=dist/bundle.js",
+    "build:bundle": "npx esbuild src/main.ts --bundle --platform=node --sourcemap --loader:.ts=ts --define:process.env.APP_BUILD_VERSION=\\\"$APP_VERSION\\\" --outfile=dist/bundle.js",
     "build:sea-blob": "node --experimental-sea-config sea-config.json",
     "build:sea-copy": "cp $(command -v node) dist/$npm_package_name",
     "build:sea-postject": "npx postject dist/$npm_package_name NODE_SEA_BLOB dist/sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
