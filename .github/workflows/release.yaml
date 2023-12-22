@@ -9,8 +9,15 @@ jobs:
         APP_VERSION: 0.1.${{ github.run_number }}
     steps:
       - uses: actions/checkout@main
+      - uses: actions/cache@main
+        with:
+          path: node_modules
+          key: node_modules_${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            node_modules_
       - name: build
         run: |
+          npm install
           npm run build
           npm run test
       - name: release
