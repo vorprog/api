@@ -1,20 +1,19 @@
 on:
-  push:
-    tags:
-      - v*
   workflow_dispatch: 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
         APP_NAME: ${{ github.repository }}
-        APP_VERSION: ${{ github.ref_name }}.${{ github.run_number}}
+        APP_VERSION: 0.1.${{ github.run_number}}
     steps:
       - uses: actions/checkout@main
       - run: |
           npm run build
           npm run test
           tar -czvf ./dist/$APP_NAME.tar.gz ./dist/$APP_NAME
+          git tag $APP_VERSION
+          git push origin $APP_VERSION
           gh release create $APP_VERSION --generate-notes
           gh release upload $APP_VERSION ./dist/$APP_NAME.tar.gz
-#          aws s3 cp ./dist/$APP_NAME.tar.gz s3://${{ github.repository_owner }}/$APP_NAME/$APP_VERSION.tar.gz
+        # aws s3 cp ./dist/$APP_NAME.tar.gz s3://${{ github.repository_owner }}-$APP_NAME/$APP_VERSION.tar.gz
