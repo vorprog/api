@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
         APP_NAME: ${{ github.repository }}
-        APP_VERSION: ${{ github.ref }}.${{ github.run_number}}
+        APP_VERSION: ${{ github.ref_name }}.${{ github.run_number}}
     steps:
       - uses: actions/checkout@main
       - run: |
