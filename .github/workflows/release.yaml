@@ -9,6 +9,9 @@ jobs:
         APP_VERSION: 0.1.${{ github.run_number }}
     steps:
       - uses: actions/checkout@main
+      - uses: actions/setup-node@main
+        with:
+          node-version: 20
       - uses: actions/cache@main
         with:
           path: node_modules
