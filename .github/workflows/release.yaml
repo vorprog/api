@@ -24,7 +24,7 @@ jobs:
           npm run build
           npm run test
       - name: release
-        if: github.ref == github.event.repository.default_branch
+        if: github.ref == 'refs/heads/${{ github.event.repository.default_branch }}'
         run: |
           git tag $APP_VERSION
           git push origin $APP_VERSION
