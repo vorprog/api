@@ -1,6 +1,5 @@
-on:
-  push:
-  workflow_dispatch:
+on: { push: , workflow_dispatch: }
+defaults: { run: { shell: 'bash -ex {0}' } }
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -10,8 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@main
       - uses: actions/setup-node@main
-        with:
-          node-version: 20
+        with: { node-version: 20 }
       - uses: actions/cache@main
         with:
           path: node_modules
@@ -19,10 +17,7 @@ jobs:
           restore-keys: |
             node_modules_
       - name: build
-        run: |
-          npm install
-          npm run build
-          npm run test
+        run: npm install && npm run build && npm run test
       - name: release
         if: github.ref == 'refs/heads/${{ github.event.repository.default_branch }}'
         env:
@@ -31,6 +26,7 @@ jobs:
           BINARY_HASH: ${{ hashFiles(env.BINARY_PATH) }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
         run: |
           git tag $APP_VERSION
           git push origin $APP_VERSION
