@@ -1,17 +1,11 @@
 import { RequestListener } from "node:http";
 import { VerifyJwt, GetHttpRequestBody, Log } from './utility';
+import { appendFileSync } from "node:fs";
 
-const subnetBlacklist: string[] = [];
+const ipAbuseCount: Record<string, number> = {};
 const webRTCConnections = {};
 
 export const httpHandler: RequestListener = async (request, response) => {
-  for (const subnet of subnetBlacklist) {
-    if (!request.socket.remoteAddress || request.socket.remoteAddress.startsWith(subnet)) {
-      Log({ blocked: request.socket.remoteAddress});
-      return;
-    }
-  }
-
   const requestObject = {
     method: request.method,
     url: request.url,
@@ -32,6 +26,16 @@ export const httpHandler: RequestListener = async (request, response) => {
   if (request.headers['authorization']) {
     const token = request.headers['authorization'].split(' ')[1];
     if (!VerifyJwt(token)) {
+      const reqAddr = request.socket.remoteAddress;
+      if (ipAbuseCount[reqAddr] > 10) {
+        Log({ blocked: reqAddr});
+        appendFileSync('xdp-blocklist.csv', `${reqAddr}\n`);
+        delete ipAbuseCount[reqAddr];
+        return;
+      }
+
+      ipAbuseCount[reqAddr] = (ipAbuseCount[reqAddr] || 0) + 1;
+
       response.writeHead(401, { 'Content-Type': 'text/plain' });
       response.end('Unauthorized\n');
       return;
@@ -50,8 +54,6 @@ export const httpHandler: RequestListener = async (request, response) => {
       response.end('OK\n');
       return;
     }
-
-
 
     response.writeHead(200, { 'Content-Type': 'application/json' });
     response.end(JSON.stringify(requestObject) + '\n');
