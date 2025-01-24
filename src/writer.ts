@@ -1,6 +1,6 @@
 import { FileHandle } from 'node:fs/promises';
 import { encodeBigIntb64v2, decodeBigIntb64v2, ThrowErr, SampleMemoryUsage } from './utility';
-import { PartitionLineLength, LineByteLength } from './config';
+import { FileLineLength, LineByteLength } from './config';
 
 const formatValue = (v) => v === null ? '' :
   typeof v === 'string' ? v.replace(/"/g, `'`).replace(/,/g, `;`).trim() :
@@ -11,7 +11,7 @@ const formatValue = (v) => v === null ? '' :
 
 export const WriteLine = async (params: { file: FileHandle, row: number, schema: Object }) => {
   const { file, row, schema: data } = params;
-  if (row < 0 || row > PartitionLineLength) throw new Error(`Line number ${row} is out of range`);
+  if (row < 0 || row > FileLineLength) throw new Error(`Line number ${row} is out of range`);
 
   const stringValues = row === 0 ? Object.keys(data) : Object.values(data).map(formatValue);
   const dataString = stringValues.join(',');
@@ -31,7 +31,7 @@ export const WriteLine = async (params: { file: FileHandle, row: number, schema:
 
 export const ReadLine = async (p: { file: FileHandle, row: number, schema?: Object }) => {
   const { file, row, schema } = p;
-  if (row < 0 || row > PartitionLineLength) throw new Error(`Line number ${row} is out of range`);
+  if (row < 0 || row > FileLineLength) throw new Error(`Line number ${row} is out of range`);
 
   const buffer = Buffer.alloc(LineByteLength);
   await file.read(buffer, 0, LineByteLength, row * LineByteLength);
