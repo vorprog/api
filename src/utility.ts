@@ -6,9 +6,6 @@ import { PrivateKey, PublicKey } from './config';
 const base64Charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 let averageMemoryUsage = process.memoryUsage().heapUsed;
 
-const jsonStringify = (obj: { [k: string]: unknown }) => JSON.stringify(obj, (_key, value) =>
-  typeof value === 'bigint' ? value.toString() : value);
-
 export const VerifyJwt = (token: string) => {
   const parts = token.split('.');
   const header = JSON.parse(Buffer.from(parts[0], 'base64url').toString());
@@ -31,24 +28,22 @@ export const GenerateJwt = (payload: any) => {
   return `${encodedHeader}.${encodedPayload}.${encodedSignature}`;
 }
 
-export const Log = (data?: string | { [k: string]: unknown }, tag?: string) => {
+export const Log = (data?: string | object | number | boolean | bigint) => {
   const stackTrace = new Error().stack;
   const stackCall = stackTrace?.split('\n')?.[2]?.trim();
+  const json = JSON.stringify(data, (_key, value) => typeof value === 'bigint' ? value.toString() : value);
+  const logContent = [
+    process.argv[3] || 'main',
+    stackCall?.split(' ')[1],
+    new Date().getTime(),
+    JSON.stringify(json)
+  ].join(',');
 
-  const logObject = {
-    p: process.argv[3] || 'main',
-    f: stackCall?.split(' ')[1],
-    t: new Date().getTime(),
-    d: data
-  };
-
-  if (tag) logObject['g'] = `tag_${tag}`;
-
-  console.log(jsonStringify(logObject));
-  return logObject;
+  console.log(logContent);
+  return logContent;
 }
 
-export const ThrowErr = (m: string): never => { throw new Error(m) };
+export const Throw = (e: Error): never => { throw e };
 
 export const SampleMemoryUsage = () => averageMemoryUsage = (averageMemoryUsage + process.memoryUsage().heapUsed) / 2;
 export const GetMemoryUsage = () => Math.round(averageMemoryUsage / 1024 / 1024 * 100) / 100
@@ -95,3 +90,5 @@ export const GetCountryCIDRs = async (countryCode: string) => {
 
   const awsIpResponse = await fetch('https://ip-ranges.amazonaws.com/ip-ranges.json'); // TODO
 }
+
+export const timeout = async (ms = 1) => new Promise((resolve) => setTimeout(resolve, ms));

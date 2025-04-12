@@ -1,34 +1,26 @@
-import { MsEpochReservationLimit } from './config';
+/** A map of how many IDs are reserved for each millisecond's epoch */
+const msEpochReservations: Record<number, number> = {};
+let oldEpoch = new Date().getTime() - 1000;
 
-let MsEpochReservations: { [key: number]: number } = {};
-
-const attemptReserveId = (p?: { millisecondEpoch?: number, attempt?: number, maxAttempts?: number }): bigint | boolean => {
-  const ms = p?.millisecondEpoch || new Date().getTime();
-
-  if (MsEpochReservations.hasOwnProperty(ms) === false) MsEpochReservations[ms] = 0;
-  else if (MsEpochReservations[ms] < (MsEpochReservationLimit - 1)) MsEpochReservations[ms]++;
-  else {
-    const attempt = p?.attempt || 1;
-    const maxAttempts = p?.maxAttempts || 10;
-    if (attempt < maxAttempts) return attemptReserveId({ millisecondEpoch: ms + 1, attempt: attempt + 1, maxAttempts: maxAttempts });
-    else return false;
+setInterval(() => {
+  oldEpoch = new Date().getTime() - 1000
+  for (const key in msEpochReservations) {
+    if (parseInt(key) < oldEpoch) delete msEpochReservations[key];
   }
+}, 1000);
 
-  const uniqueMsInt = MsEpochReservations[ms];
-  return BigInt(ms) * BigInt(MsEpochReservationLimit) + BigInt(uniqueMsInt);
+export class ReserveIDError extends Error {}
+
+export const ReserveId = (attempt = 0) => {
+  const ms = new Date().getTime();
+
+  if (msEpochReservations.hasOwnProperty(ms) === false) msEpochReservations[ms] = 0;
+  else if (msEpochReservations[ms] < 999) msEpochReservations[ms]++;
+  else if (attempt < 10) return ReserveId(attempt + 1);
+  else throw new ReserveIDError(`Maximum attempts reached for ID reservation at ${ms}`);
+
+  return BigInt(ms) * 1000n + BigInt(msEpochReservations[ms]);
 }
 
-export const GenerateId = () => {
-  const result = attemptReserveId();
-  if (typeof result !== 'bigint') throw new Error(`Could not reserve an id`);
-  return result;
-}
-
-export const ReserveId = (p?: { date?: Date }) => {
-  const millisecondEpoch = p?.date?.getTime() || new Date().getTime();
-  const result = attemptReserveId({ millisecondEpoch: millisecondEpoch, maxAttempts: 1 });
-  if (typeof result !== 'bigint') throw new Error(`Could not reserve id for millisecond epoch: ${millisecondEpoch}`);
-  return result;
-}
-
-export const ReadMsEpochReservations = () => JSON.stringify(MsEpochReservations);
+/** Return a copy of how many IDs are reserved for each millisecond's epoch */
+export const ReadMsEpochReservations = () => Object.assign({}, msEpochReservations);
