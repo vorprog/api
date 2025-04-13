@@ -4,12 +4,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-        APP_NAME: ${{ github.event.repository.name }}
-        APP_VERSION: 0.1.${{ github.run_number }}
+      APP_NAME: ${{ github.event.repository.name }}
+      BINARY_PATH: ./dist/${{ github.event.repository.name }}
+      APP_VERSION: 0.1.${{ github.run_number }}
     steps:
       - uses: actions/checkout@main
       - uses: actions/setup-node@main
-        with: { node-version: 20 }
       - uses: actions/cache@main
         with:
           path: node_modules
@@ -17,12 +17,11 @@ jobs:
           restore-keys: |
             node_modules_
       - name: build
-        run: npm install && npm run build && npm run test
+        run: npm ci && npm run build && npm run test
       - name: release
         if: github.ref == 'refs/heads/${{ github.event.repository.default_branch }}'
         env:
           GH_TOKEN: ${{ github.token }}
-          BINARY_PATH: ./dist/${{ env.APP_NAME }}
           BINARY_HASH: ${{ hashFiles(env.BINARY_PATH) }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
