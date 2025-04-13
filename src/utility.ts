@@ -1,7 +1,7 @@
 import { createVerify, createSign } from 'node:crypto';
 import { IncomingMessage } from 'node:http';
 import { createGzip, createGunzip } from 'node:zlib';
-import { PrivateKey, PublicKey } from './config';
+import { PrivateKey, PublicKey } from './config.ts';
 
 const base64Charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 let averageMemoryUsage = process.memoryUsage().heapUsed;

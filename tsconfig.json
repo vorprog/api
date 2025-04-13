@@ -3,10 +3,11 @@
     "outDir": "dist",
     "noImplicitAny": false,
     "module": "NodeNext",
-    "target": "ES2024",
-    "jsx": "react",
+    "target": "ESNext",
     "allowJs": true,
     "moduleResolution": "NodeNext",
     "downlevelIteration": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
   }
 }

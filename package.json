@@ -9,7 +9,7 @@
     "build": "npm run build:bundle && npm run build:sea-blob && npm run build:sea-copy && npm run build:sea-postject",
     "execute": "./dist/$npm_package_name",
     "start": "npm run build && npm run execute",
-    "test": "cd test && npm start"
+    "test": "node --experimental-strip-types test/test.ts"
   },
   "keywords": [],
   "author": "",
