@@ -4,6 +4,7 @@ import { faker } from '@faker-js/faker';
 import { GetMemoryUsage, Log } from './utility';
 import { ReserveId, ReadMsEpochReservations } from './id-service';
 import { WriteLine, ReadLine, WriterTypeError } from './writer';
+import { } from './data';
 
 export const generateUsers = async () => {
   const startTimestamp = new Date();

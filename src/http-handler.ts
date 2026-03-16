@@ -1,6 +1,7 @@
 import { RequestListener } from "node:http";
 import { VerifyJwt, GetHttpRequestBody, Log } from './utility';
 import { appendFileSync } from "node:fs";
+import { WriteLine } from './writer';
 
 const ipAbuseCount: Record<string, number> = {};
 const webRTCConnections = {};
@@ -63,6 +64,12 @@ export const httpHandler: RequestListener = async (request, response) => {
   if (request.method === 'POST') {
     const body = await GetHttpRequestBody(request);
     const bodyJson = JSON.parse(body);
+
+    if (request.url === '/users') {
+      response.writeHead(200, { 'Content-Type': 'application/json' });
+      WriteLine({ file: 'users.csv', row: 0, data: bodyJson });
+      return;
+    }
 
     if (request.url === '/upgrade/webrtc') {
       const peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
